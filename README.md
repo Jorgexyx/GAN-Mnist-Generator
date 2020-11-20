@@ -10,3 +10,6 @@ pip install -r requirments.txt
 ```
 python gan-mnist.py
 ```
+
+## Results
+![image](images/results.png)
