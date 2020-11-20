@@ -25,10 +25,8 @@ iteration_checkpoints = []
  Define Hyperparameter constants
 """
 batch_size = 128
-iterations = 2000
+iterations = 20000
 sample_interval = 1000
-
-
 
 def get_generator(img_shape, z_dim):
     """
@@ -37,7 +35,7 @@ def get_generator(img_shape, z_dim):
             output: 28 *28 * 1 image 
             
     """
-    model = Sequential()
+    model = Sequential(name="gen")
     model.add(Dense(128, input_dim=z_dim)) # 128 units
     model.add(LeakyReLU(alpha=0.01))
     model.add(Dense(img_rows*img_cols*channels, activation='tanh')) # tahnh for crispier images
@@ -50,7 +48,7 @@ def get_discriminator(img_shape):
             input: 28 * 28 *1 image
             oput: probability whether image is real rather than fake
     """
-    model = Sequential()
+    model = Sequential(name="disc")
     model.add(Flatten(input_shape=img_shape))
     model.add(Dense(128))
     model.add(LeakyReLU(alpha=0.01))
@@ -61,7 +59,7 @@ def get_gan(generator, discriminator):
     """
         Build Gan
     """
-    model = Sequential()
+    model = Sequential(name="Gan")
     model.add(generator)
     model.add(discriminator)
     return model
@@ -102,23 +100,23 @@ def train():
             losses.append((d_loss, g_loss))
             accuracies.append(100.0 * accuracy)
             iteration_checkpoints.append(i + 1)
-            print("%d [D loss: %f, acc.: %.2f%% [G Loss: %f]" % (i + 1, d_loss, 100.0 * accuracy * g_loss))
+            print("%d [D loss: %f, acc.: %.2f%% [G Loss: %f]" % (i + 1, d_loss, 100.0 * accuracy, g_loss))
             sample_images()
 
 def sample_images():
     # random noise
-    z = np.random.randint(0, 1, (4*4*z_dim))
+    z = np.random.normal(0, 1, (4*4,z_dim))
 
     #rescale to 0 and 1
-    gen_imgs = generator.predict(z)
+    gen_imgs = gen.predict(z)
     gen_imgs = 0.5 * gen_imgs + 0.5
 
-    fig, axs = plt.subplots(4, 4, figsize=(4,4), sharey=True, sharex = true)
+    fig, axs = plt.subplots(4, 4, figsize=(4,4), sharey=True, sharex = True)
     cnt = 0
     for i in range(4):
         for j in range(4):
             axs[i,j].imshow(gen_imgs[cnt, :, :, 0], cmap='gray')
-            axis[i,j].axis('off')
+            axs[i,j].axis('off')
             cnt += 1
 
     
@@ -131,10 +129,7 @@ gen = get_generator(img_shape, z_dim)
 gan = get_gan(gen, disc)
 gan.compile(loss='binary_crossentropy', optimizer=Adam())
 train()
-
-
-
-
+plt.show()
 
     
 
